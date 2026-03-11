@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: neuralproxy_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: neuralproxy
+    ports:
+      - "5436:5432"
+
+  redis:
+    image: redis:7
+    container_name: neuralproxy_redis
+    ports:
+      - "6380:6379"

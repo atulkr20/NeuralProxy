@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ApiKey {
+  id               String   @id @default(uuid())
+  keyHash          String   @unique
+  name             String
+  ownerId          String
+  rateLimit        Int      @default(100)
+  monthlyBudget    Decimal  @default(10.00) @db.Decimal(10, 4)
+  allowedProviders String[]
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  requestLogs RequestLog[]
+
+  @@map("api_keys")
+}
+
+model RequestLog {
+  id           String   @id @default(uuid())
+  apiKeyId     String
+  provider     String
+  model        String
+  promptHash   String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Decimal  @db.Decimal(10, 6)
+  latencyMs    Int
+  cacheHit     Boolean  @default(false)
+  fallbackUsed Boolean  @default(false)
+  status       String
+  createdAt    DateTime @default(now())
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id])
+
+  @@map("request_logs")
+}
+
+model ProviderConfig {
+  id               String  @id @default(uuid())
+  provider         String  @unique
+  priority         Int
+  isEnabled        Boolean @default(true)
+  costPer1kInput   Decimal @db.Decimal(8, 6)
+  costPer1kOutput  Decimal @db.Decimal(8, 6)
+
+  @@map("provider_configs")
+}
