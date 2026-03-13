@@ -16,12 +16,15 @@ import { logQueue } from "./queues/logQueue";
 import { calculateCost } from "./services/cost.service";
 import crypto from 'crypto'
 import { budgetMiddleware } from "./middleware/budget.middleware";
+import analyticsRouter from './routes/analytics.routes';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 startLoggerWorker();
+app.use("/v1/analytics", analyticsRouter);
+
 
 // Temporary budget test
 app.post("/test-budget", authMiddleware, budgetMiddleware, (req, res) => {
