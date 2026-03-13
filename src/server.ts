@@ -12,6 +12,9 @@ import { routeRequest } from "./services/router.service";
 import { rateLimitMiddleware } from "./middleware/rateLimit.middleware";
 import { getCachedResponse, setCachedResponse } from "./services/cache.service";
 import { startLoggerWorker } from "./workers/logger.worker";
+import { logQueue } from "./queues/logQueue";
+import { calculateCost } from "./services/cost.service";
+import crypto from 'crypto'
 
 dotenv.config();
 
@@ -19,6 +22,54 @@ const app = express();
 app.use(express.json());
 startLoggerWorker();
 
+
+// Temporary log queue test
+app.post("/test-logger", authMiddleware, async (req, res) => {
+  const { model, messages } = req.body;
+
+  const startTime = Date.now();
+
+  // Call the router
+  const response = await routeRequest({ model, messages });
+
+  const latencyMs = Date.now() - startTime;
+
+  // Calculate cost
+  const costUsd = await calculateCost(
+    response.provider,
+    response.inputTokens,
+    response.outputTokens
+  );
+
+  // Generate prompt hash
+  const promptHash = crypto
+    .createHash("sha256")
+    .update(model + JSON.stringify(messages))
+    .digest("hex");
+
+  // Enqueue log job — don't wait for it
+  await logQueue.add("log-request", {
+    apiKeyId: req.apiKey.id,
+    provider: response.provider,
+    model,
+    promptHash,
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
+    costUsd,
+    latencyMs,
+    cacheHit: false,
+    fallbackUsed: response.fallbackUsed,
+    status: "success",
+  });
+
+  // Return response immediately without waiting for DB write
+  res.json({
+    content: response.content,
+    provider: response.provider,
+    latencyMs,
+    costUsd,
+  });
+});
 
 // Temporary cache test route
 app.post("/test-cache", authMiddleware, async (req, res) => {
