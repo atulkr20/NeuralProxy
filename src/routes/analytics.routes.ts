@@ -7,6 +7,20 @@ const router = Router();
 // All analytics routes require auth
 router.use(authMiddleware);
 
+/**
+ * @swagger
+ * /v1/analytics/usage:
+ *   get:
+ *     tags:
+ *       - Analytics
+ *     summary: Get total usage stats for your API key
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Total requests, tokens, and cost
+ */
+
 // Usage - total requests, tokens, cost
 router.get('/usage', async (req: Request, res: Response) => {
     const apiKeyId = req.apiKey.id;
@@ -28,6 +42,20 @@ router.get('/usage', async (req: Request, res: Response) => {
         totalCostUsd: result._sum.costUsd || 0,
     });
 });
+
+/**
+ * @swagger
+ * /v1/analytics/costs:
+ *   get:
+ *     tags:
+ *       - Analytics
+ *     summary: Get cost breakdown by provider and model
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cost breakdown per provider and model
+ */
 
 // Costs - breakdown by provider and model
 router.get('/costs', async(req: Request, res: Response) => {
@@ -53,6 +81,22 @@ router.get('/costs', async(req: Request, res: Response) => {
         totalOutputTokens: item._sum.outputTokens || 0,
     })));
 });
+
+
+/**
+ * @swagger
+ * /v1/analytics/cache:
+ *   get:
+ *     tags:
+ *       - Analytics
+ *     summary: Get cache hit rate and savings
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache hit rate, tokens saved, money saved
+ */
+
 
 // cache - cache hit rate and savings
 
@@ -89,6 +133,22 @@ router.get("/cache", async (req: Request, res: Response) => {
         estimateMoneySaved: cacheSavings._sum.costUsd || 0,
     });
 });
+
+/**
+ * @swagger
+ * /v1/analytics/providers:
+ *   get:
+ *     tags:
+ *       - Analytics
+ *     summary: Get provider health and latency stats
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Provider health, avg latency, error rates
+ */
+
+
 
 // Providers - provider health and latency
 router.get('/providers', async (req: Request, res: Response) => {

@@ -11,6 +11,79 @@ import { logQueue } from '../queues/logQueue';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /v1/chat:
+ *   post:
+ *     tags:
+ *       - Chat
+ *     summary: Send a message to an LLM provider
+ *     description: Routes the request to the best available LLM provider with automatic fallback, rate limiting, budget enforcement, and prompt caching.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - model
+ *               - messages
+ *             properties:
+ *               model:
+ *                 type: string
+ *                 example: llama-3.1-8b-instant
+ *               messages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     role:
+ *                       type: string
+ *                       example: user
+ *                     content:
+ *                       type: string
+ *                       example: What is the capital of France?
+ *               provider:
+ *                 type: string
+ *                 example: openai
+ *                 description: Optional — uses priority order if not specified
+ *     responses:
+ *       200:
+ *         description: Successful response from LLM
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 content:
+ *                   type: string
+ *                 provider_used:
+ *                   type: string
+ *                 cache_hit:
+ *                   type: boolean
+ *                 tokens:
+ *                   type: object
+ *                   properties:
+ *                     input:
+ *                       type: integer
+ *                     output:
+ *                       type: integer
+ *                 cost_usd:
+ *                   type: number
+ *                 fallback_used:
+ *                   type: boolean
+ *       401:
+ *         description: Invalid or missing API key
+ *       429:
+ *         description: Rate limit exceeded
+ *       402:
+ *         description: Monthly budget exceeded
+ *       500:
+ *         description: All providers failed
+ */
+
 // Chat
 
 router.post('/', 

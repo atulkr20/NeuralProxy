@@ -18,6 +18,8 @@ import crypto from 'crypto'
 import { budgetMiddleware } from "./middleware/budget.middleware";
 import analyticsRouter from './routes/analytics.routes';
 import chatRouter from './routes/chat.routes';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger";
 
 dotenv.config();
 
@@ -158,6 +160,9 @@ app.get("/debug/keys", async (req, res) => {
   });
   res.json(keys);
 });
+
+// Swagger docs
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = process.env.PORT || 3000;
 
