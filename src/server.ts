@@ -17,6 +17,7 @@ import { calculateCost } from "./services/cost.service";
 import crypto from 'crypto'
 import { budgetMiddleware } from "./middleware/budget.middleware";
 import analyticsRouter from './routes/analytics.routes';
+import chatRouter from './routes/chat.routes';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ const app = express();
 app.use(express.json());
 startLoggerWorker();
 app.use("/v1/analytics", analyticsRouter);
+app.use('/v1/chat', chatRouter);
 
 
 // Temporary budget test
