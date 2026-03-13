@@ -10,11 +10,39 @@ import keysRouter from "./routes/keys.routes";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { routeRequest } from "./services/router.service";
 import { rateLimitMiddleware } from "./middleware/rateLimit.middleware";
+import { getCachedResponse, setCachedResponse } from "./services/cache.service";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// Temporary cache test route
+app.post("/test-cache", authMiddleware, async (req, res) => {
+  const { model, messages } = req.body;
+
+  // Check cache first
+  const cached = await getCachedResponse(model, messages);
+
+  if (cached) {
+    res.json({
+      ...cached,
+      cacheHit: true,
+    });
+    return;
+  }
+
+  // Cache miss — call the router
+  const response = await routeRequest({ model, messages });
+
+  // Store in cache
+  await setCachedResponse(model, messages, response);
+
+  res.json({
+    ...response,
+    cacheHit: false,
+  });
+});
 
 //Tamporary rate limit test route
 app.post("/test-ratelimit", authMiddleware, rateLimitMiddleware, (req, res) => {
