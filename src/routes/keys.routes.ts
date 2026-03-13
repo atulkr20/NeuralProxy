@@ -62,5 +62,29 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 });
 
+router.patch("/:id", async (req: Request, res: Response) => {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+    if (!id) {
+        res.status(400).json({ error: 'invalid api key id' });
+        return;
+    }
+
+  const { rateLimit, monthlyBudget, allowedProviders } = req.body;
+
+  const apiKey = await prisma.apiKey.update({
+        where: { id },
+    data: {
+      ...(rateLimit && { rateLimit }),
+      ...(monthlyBudget && { monthlyBudget }),
+      ...(allowedProviders && { allowedProviders }),
+    },
+  });
+
+  const { keyHash, ...safeData } = apiKey;
+  res.json(safeData);
+});
+
 export default router;
 
