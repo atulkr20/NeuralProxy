@@ -11,11 +11,14 @@ import { authMiddleware } from "./middleware/auth.middleware";
 import { routeRequest } from "./services/router.service";
 import { rateLimitMiddleware } from "./middleware/rateLimit.middleware";
 import { getCachedResponse, setCachedResponse } from "./services/cache.service";
+import { startLoggerWorker } from "./workers/logger.worker";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+startLoggerWorker();
+
 
 // Temporary cache test route
 app.post("/test-cache", authMiddleware, async (req, res) => {
