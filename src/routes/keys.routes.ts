@@ -62,7 +62,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.post('/:id', async (req: Request, res: Response) => {
     const rawId = req.params.id;
     const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
@@ -76,9 +76,9 @@ router.patch("/:id", async (req: Request, res: Response) => {
   const apiKey = await prisma.apiKey.update({
         where: { id },
     data: {
-      ...(rateLimit && { rateLimit }),
-      ...(monthlyBudget && { monthlyBudget }),
-      ...(allowedProviders && { allowedProviders }),
+            ...(rateLimit !== undefined && { rateLimit }),
+            ...(monthlyBudget !== undefined && { monthlyBudget }),
+            ...(allowedProviders !== undefined && { allowedProviders }),
     },
   });
 

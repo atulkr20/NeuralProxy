@@ -15,12 +15,18 @@ import { startLoggerWorker } from "./workers/logger.worker";
 import { logQueue } from "./queues/logQueue";
 import { calculateCost } from "./services/cost.service";
 import crypto from 'crypto'
+import { budgetMiddleware } from "./middleware/budget.middleware";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 startLoggerWorker();
+
+// Temporary budget test
+app.post("/test-budget", authMiddleware, budgetMiddleware, (req, res) => {
+  res.json({ message: "Budget check passed", budget: req.apiKey.monthlyBudget });
+});
 
 
 // Temporary log queue test
@@ -137,13 +143,6 @@ app.get("/test-auth", authMiddleware, (req, res) => {
 
 // Routes
 app.use("/v1/keys", keysRouter);
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`NeuralProxy server running on port ${PORT}`);
-});
-
 app.get("/debug/keys", async (req, res) => {
   const keys = await prisma.apiKey.findMany({
     select: {
@@ -154,3 +153,10 @@ app.get("/debug/keys", async (req, res) => {
   });
   res.json(keys);
 });
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`NeuralProxy server running on port ${PORT}`);
+});
+

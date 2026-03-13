@@ -20,3 +20,30 @@ export async function calculateCost(
 
     return inputCost + outputCost;
 }
+
+// Check if the api key has exceeded monthly budget 
+
+export async function isOverBudget(apiKeyId: string, monthlyBudget: number): Promise<boolean> {
+    // Get start of current month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0,0,0,0);
+
+    // Sum all costa for this key for this month
+    const result = await prisma.requestLog.aggregate({
+        where: {
+            apiKeyId, 
+            createdAt: { gte: startOfMonth },
+            status: 'success',
+        },
+        _sum: {
+            costUsd: true,
+        },
+    });
+    const totalSpent = Number(result._sum.costUsd || 0);
+
+    console.log(`Key ${apiKeyId} spent $${totalSpent} of $${monthlyBudget} this month`);
+
+    return totalSpent >= monthlyBudget;
+
+}
