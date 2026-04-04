@@ -1,13 +1,15 @@
 import { ProviderAdapter, ChatRequest, ChatResponse } from "../providers/adapter.interface";
-import { GroqAdapter } from "../providers/openai.adapter";
+import { OpenAIAdapter } from "../providers/openai.adapter";
 import { GeminiAdapter } from "../providers/gemini.adapter";
 import { MockAdapter } from "../providers/mock.adapter";
 import prisma from '../prisma';
 
 // Map the provider name to adapter instance
 const adapterMap: Record<string, ProviderAdapter> = {
-    openai: new GroqAdapter(),
+    openai: new OpenAIAdapter(),
+    groq: new OpenAIAdapter(),
     gemini: new GeminiAdapter(),
+    mistral: new GeminiAdapter(),
     anthropic: new MockAdapter(),
 };
 

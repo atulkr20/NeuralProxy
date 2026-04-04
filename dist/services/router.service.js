@@ -10,8 +10,10 @@ const mock_adapter_1 = require("../providers/mock.adapter");
 const prisma_1 = __importDefault(require("../prisma"));
 // Map the provider name to adapter instance
 const adapterMap = {
-    openai: new openai_adapter_1.GroqAdapter(),
+    openai: new openai_adapter_1.OpenAIAdapter(),
+    groq: new openai_adapter_1.OpenAIAdapter(),
     gemini: new gemini_adapter_1.GeminiAdapter(),
+    mistral: new gemini_adapter_1.GeminiAdapter(),
     anthropic: new mock_adapter_1.MockAdapter(),
 };
 async function routeRequest(request, preferredProvider) {

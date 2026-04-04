@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GroqAdapter = void 0;
+exports.OpenAIAdapter = void 0;
 const axios_1 = __importDefault(require("axios"));
 const https_1 = __importDefault(require("https"));
 // Force IPv4 to fix DNS resolution issues on Windows
 const httpsAgent = new https_1.default.Agent({ family: 4 });
-class GroqAdapter {
+class OpenAIAdapter {
     constructor() {
         this.name = "openai";
     }
@@ -31,4 +31,4 @@ class GroqAdapter {
         };
     }
 }
-exports.GroqAdapter = GroqAdapter;
+exports.OpenAIAdapter = OpenAIAdapter;

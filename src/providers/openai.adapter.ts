@@ -5,7 +5,7 @@ import { ProviderAdapter, ChatRequest, ChatResponse } from "./adapter.interface"
 // Force IPv4 to fix DNS resolution issues on Windows
 const httpsAgent = new https.Agent({ family: 4 });
 
-export class GroqAdapter implements ProviderAdapter {
+export class OpenAIAdapter implements ProviderAdapter {
   name = "openai";
 
   async call(request: ChatRequest): Promise<ChatResponse> {
