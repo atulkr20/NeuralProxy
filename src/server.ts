@@ -27,7 +27,7 @@ app.use("/v1/analytics", analyticsRouter);
 
 // Swagger docs
 app.use(
-  "/docs",
+  "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     swaggerOptions: {
@@ -45,6 +45,27 @@ app.use(
     },
   })
 );
+
+app.get("/docs", (req, res) => {
+  res.redirect("/api-docs");
+});
+
+app.get("/", (req, res) => {
+  res.json({
+    service: "NeuralProxy",
+    description: "AI gateway with multi-provider LLM routing and rate limiting",
+    version: "1.0.0",
+    status: "ok",
+    features: [
+      "Multi-provider LLM routing (Groq, Gemini)",
+      "Sliding window rate limiting via Redis",
+      "SHA-256 prompt caching",
+      "Async cost logging via BullMQ",
+    ],
+    github: "github.com/atulkr20/neuralproxy",
+    live: "neuralproxy.itsatul.tech/api-docs",
+  });
+});
 
 // Health check
 app.get("/health", (req, res) => {

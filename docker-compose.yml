@@ -1,18 +1,40 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  backend:
+    image: atulkr20/neuralproxy:latest
+    container_name: neuralproxy_backend
+    restart: unless-stopped
+    ports:
+      - '3002:3000' 
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env
+
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: neuralproxy_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: neuralproxy
     ports:
-      - "5436:5432"
+      - '5436:5432'
+    volumes:
+      - neuralproxy_postgres_data:/var/lib/postgresql/data
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: neuralproxy_redis
+    restart: unless-stopped
     ports:
-      - "6380:6379"
+      - '6381:6379'
+    volumes:
+      - neuralproxy_redis_data:/data
+
+volumes:
+  neuralproxy_postgres_data:
+  neuralproxy_redis_data:

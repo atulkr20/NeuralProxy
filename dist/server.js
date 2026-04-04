@@ -24,17 +24,38 @@ app.use("/v1/chat", chat_routes_1.default);
 app.use("/v1/keys", keys_routes_1.default);
 app.use("/v1/analytics", analytics_routes_1.default);
 // Swagger docs
-app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec, {
-    operationsSorter: (a, b) => {
-        if (a.get("path") === "/v1/keys" && a.get("method") === "post") {
-            return -1;
-        }
-        if (b.get("path") === "/v1/keys" && b.get("method") === "post") {
-            return 1;
-        }
-        return 0;
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec, {
+    swaggerOptions: {
+        operationsSorter: (a, b) => {
+            if (a.get("path") === "/v1/keys" && a.get("method") === "post") {
+                return -1;
+            }
+            if (b.get("path") === "/v1/keys" && b.get("method") === "post") {
+                return 1;
+            }
+            return 0;
+        },
     },
 }));
+app.get("/docs", (req, res) => {
+    res.redirect("/api-docs");
+});
+app.get("/", (req, res) => {
+    res.json({
+        service: "NeuralProxy",
+        description: "AI gateway with multi-provider LLM routing and rate limiting",
+        version: "1.0.0",
+        status: "ok",
+        features: [
+            "Multi-provider LLM routing (Groq, Gemini)",
+            "Sliding window rate limiting via Redis",
+            "SHA-256 prompt caching",
+            "Async cost logging via BullMQ",
+        ],
+        github: "github.com/atulkr20/neuralproxy",
+        live: "neuralproxy.itsatul.tech/api-docs",
+    });
+});
 // Health check
 app.get("/health", (req, res) => {
     res.json({ status: "ok", message: "NeuralProxy is running" });

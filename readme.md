@@ -142,6 +142,34 @@ Three core tables:
 
 ## API Endpoints
 
+### Homepage
+```
+GET /
+
+Response:
+{
+  "service": "NeuralProxy",
+  "description": "AI gateway with multi-provider LLM routing and rate limiting",
+  "version": "1.0.0",
+  "status": "ok",
+  "features": [
+    "Multi-provider LLM routing (Groq, Gemini)",
+    "Sliding window rate limiting via Redis",
+    "SHA-256 prompt caching",
+    "Async cost logging via BullMQ"
+  ],
+  "github": "github.com/atulkr20/neuralproxy",
+  "live": "neuralproxy.itsatul.tech/api-docs"
+}
+```
+
+### Swagger UI
+```
+GET /api-docs
+```
+
+`/docs` redirects to `/api-docs`.
+
 ### Core Proxy
 ```
 POST /v1/chat
@@ -246,5 +274,7 @@ npx ts-node -r dotenv/config src/seed.ts
 # 5. Start the server
 npm run dev
 ```
+
+After starting locally, Swagger UI is available at `http://localhost:3000/api-docs`, and the homepage JSON is at `http://localhost:3000/`.
 
 ---
