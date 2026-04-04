@@ -26,7 +26,25 @@ app.use("/v1/keys", keysRouter);
 app.use("/v1/analytics", analyticsRouter);
 
 // Swagger docs
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      operationsSorter: (a: any, b: any) => {
+      if (a.get("path") === "/v1/keys" && a.get("method") === "post") {
+        return -1;
+      }
+
+      if (b.get("path") === "/v1/keys" && b.get("method") === "post") {
+        return 1;
+      }
+
+      return 0;
+      },
+    },
+  })
+);
 
 // Health check
 app.get("/health", (req, res) => {

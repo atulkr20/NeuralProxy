@@ -11,12 +11,12 @@ const options = {
     },
     tags: [
       {
-        name: "Chat",
-        description: "Primary AI inference endpoints",
-      },
-      {
         name: "Keys",
         description: "API key management endpoints",
+      },
+      {
+        name: "Chat",
+        description: "Primary AI inference endpoints",
       },
       {
         name: "Analytics",

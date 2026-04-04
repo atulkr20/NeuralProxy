@@ -24,7 +24,17 @@ app.use("/v1/chat", chat_routes_1.default);
 app.use("/v1/keys", keys_routes_1.default);
 app.use("/v1/analytics", analytics_routes_1.default);
 // Swagger docs
-app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec));
+app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec, {
+    operationsSorter: (a, b) => {
+        if (a.get("path") === "/v1/keys" && a.get("method") === "post") {
+            return -1;
+        }
+        if (b.get("path") === "/v1/keys" && b.get("method") === "post") {
+            return 1;
+        }
+        return 0;
+    },
+}));
 // Health check
 app.get("/health", (req, res) => {
     res.json({ status: "ok", message: "NeuralProxy is running" });
