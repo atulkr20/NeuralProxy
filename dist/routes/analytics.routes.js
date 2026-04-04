@@ -1,12 +1,14 @@
-import { Router, Request, Response } from 'express';
-import prisma from '../prisma';
-import { authMiddleware } from '../middleware/auth.middleware';
-
-const router = Router();
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const prisma_1 = __importDefault(require("../prisma"));
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
 // All analytics routes require auth
-router.use(authMiddleware);
-
+router.use(auth_middleware_1.authMiddleware);
 /**
  * @swagger
  * /v1/analytics/usage:
@@ -20,12 +22,10 @@ router.use(authMiddleware);
  *       200:
  *         description: Total requests, tokens, and cost
  */
-
 // Usage - total requests, tokens, cost
-router.get('/usage', async (req: Request, res: Response) => {
+router.get('/usage', async (req, res) => {
     const apiKeyId = req.apiKey.id;
-
-    const result = await prisma.requestLog.aggregate({
+    const result = await prisma_1.default.requestLog.aggregate({
         where: { apiKeyId },
         _count: { id: true },
         _sum: {
@@ -34,15 +34,13 @@ router.get('/usage', async (req: Request, res: Response) => {
             costUsd: true,
         },
     });
-
     res.json({
         totalRequests: result._count.id,
         totalInputTokens: result._sum.inputTokens || 0,
-        totalOutputTokens: result._sum.outputTokens ||0,
+        totalOutputTokens: result._sum.outputTokens || 0,
         totalCostUsd: result._sum.costUsd || 0,
     });
 });
-
 /**
  * @swagger
  * /v1/analytics/costs:
@@ -56,12 +54,10 @@ router.get('/usage', async (req: Request, res: Response) => {
  *       200:
  *         description: Cost breakdown per provider and model
  */
-
 // Costs - breakdown by provider and model
-router.get('/costs', async(req: Request, res: Response) => {
+router.get('/costs', async (req, res) => {
     const apiKeyId = req.apiKey.id;
-
-    const result = await prisma.requestLog.groupBy({
+    const result = await prisma_1.default.requestLog.groupBy({
         by: ['provider', 'model'],
         where: { apiKeyId },
         _sum: {
@@ -71,7 +67,6 @@ router.get('/costs', async(req: Request, res: Response) => {
         },
         _count: { id: true },
     });
-
     res.json(result.map((item) => ({
         provider: item.provider,
         model: item.model,
@@ -81,8 +76,6 @@ router.get('/costs', async(req: Request, res: Response) => {
         totalOutputTokens: item._sum.outputTokens || 0,
     })));
 });
-
-
 /**
  * @swagger
  * /v1/analytics/cache:
@@ -96,44 +89,35 @@ router.get('/costs', async(req: Request, res: Response) => {
  *       200:
  *         description: Cache hit rate, tokens saved, money saved
  */
-
-
 // cache - cache hit rate and savings
-
-router.get("/cache", async (req: Request, res: Response) => {
+router.get("/cache", async (req, res) => {
     const apiKeyId = req.apiKey.id;
-
-    const totalRequests = await prisma.requestLog.count({
+    const totalRequests = await prisma_1.default.requestLog.count({
         where: { apiKeyId },
     });
-    
-    const cacheHits = await prisma.requestLog.count({
+    const cacheHits = await prisma_1.default.requestLog.count({
         where: { apiKeyId, cacheHit: true },
     });
-
     const cacheMisses = totalRequests - cacheHits;
-    const hitRate = totalRequests > 0 ? (cacheHits / totalRequests ) * 100 : 0;
-
+    const hitRate = totalRequests > 0 ? (cacheHits / totalRequests) * 100 : 0;
     // Estimate tokens saved from cache hits
-    const cacheSavings = await prisma.requestLog.aggregate({
+    const cacheSavings = await prisma_1.default.requestLog.aggregate({
         where: { apiKeyId, cacheHit: true },
         _sum: {
-            inputTokens: true, 
-            outputTokens: true, 
+            inputTokens: true,
+            outputTokens: true,
             costUsd: true,
         },
     });
-
     res.json({
         totalRequests,
         cacheHits,
         cacheMisses,
         hitRatePercent: hitRate.toFixed(2),
-        estimatedTokensSaved: (cacheSavings._sum.inputTokens || 0) + (cacheSavings._sum.outputTokens ||  0),
+        estimatedTokensSaved: (cacheSavings._sum.inputTokens || 0) + (cacheSavings._sum.outputTokens || 0),
         estimateMoneySaved: cacheSavings._sum.costUsd || 0,
     });
 });
-
 /**
  * @swagger
  * /v1/analytics/providers:
@@ -147,23 +131,17 @@ router.get("/cache", async (req: Request, res: Response) => {
  *       200:
  *         description: Provider health, avg latency, error rates
  */
-
-
-
 // Providers - provider health and latency
-router.get('/providers', async (req: Request, res: Response) => {
+router.get('/providers', async (req, res) => {
     const apiKeyId = req.apiKey.id;
-
-    const result = await prisma.requestLog.groupBy({
+    const result = await prisma_1.default.requestLog.groupBy({
         by: ['provider', 'status'],
         where: { apiKeyId },
         _count: { id: true },
         _avg: { latencyMs: true },
     });
-
     // Group by provider
-    const providerMap: Record<string, any> = {};
-
+    const providerMap = {};
     for (const item of result) {
         if (!providerMap[item.provider]) {
             providerMap[item.provider] = {
@@ -174,26 +152,21 @@ router.get('/providers', async (req: Request, res: Response) => {
                 avgLatencyMs: item._avg.latencyMs || 0,
             };
         }
-
         providerMap[item.provider].totalRequests += item._count.id;
-
-        if(item.status === 'success') {
+        if (item.status === 'success') {
             providerMap[item.provider].successCount += item._count.id;
-        } else {
+        }
+        else {
             providerMap[item.provider].failedCount += item._count.id;
         }
     }
-
     // calculate error rate per provider
-
-    const providers = Object.values(providerMap).map((p: any) => ({
+    const providers = Object.values(providerMap).map((p) => ({
         ...p,
         errorRatePercent: p.totalRequests > 0
-        ? ((p.failedCount / p.totalRequests) * 100).toFixed(2)
-        : '0.000',
+            ? ((p.failedCount / p.totalRequests) * 100).toFixed(2)
+            : '0.000',
     }));
-    
     res.json(providers);
 });
-
-export default router;
+exports.default = router;
